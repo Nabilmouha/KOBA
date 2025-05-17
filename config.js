@@ -17,8 +17,8 @@ global.defaultLenguaje = 'ar';
 
 global.owner = ['212697516526'];
 
-global.suittag = ['5219993404349'];
-global.prems = ['51995386439'];
+global.suittag = ['212697516526'];
+global.prems = ['212697516526'];
 
 // API
 global.BASE_API_DELIRIUS = "https://deliriusapi-official.vercel.app";
