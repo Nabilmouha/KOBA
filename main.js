@@ -268,13 +268,13 @@ fs.watch(dirToWatchccc, (eventType, filename) => {
 
 function purgeSession() {
 let prekey = []
-let directorio = readdirSync("./KOBYsession")
+let directorio = readdirSync("./MysticSession")
 let filesFolderPreKeys = directorio.filter(file => {
 return file.startsWith('pre-key-') /*|| file.startsWith('session-') || file.startsWith('sender-') || file.startsWith('app-') */
 })
 prekey = [...prekey, ...filesFolderPreKeys]
 filesFolderPreKeys.forEach(files => {
-unlinkSync(`./KOBYsession/${files}`)
+unlinkSync(`./MysticSession/${files}`)
 })
 } 
 
@@ -299,7 +299,7 @@ console.log(chalk.bold.red(`[ ℹ️ ] Algo salio mal durante la eliminación, a
 }}
 
 function purgeOldFiles() {
-const directories = ['./KOBYsession/', './jadibts/']
+const directories = ['./MysticSession/', './jadibts/']
 const oneHourAgo = Date.now() - (60 * 60 * 1000)
 directories.forEach(dir => {
 readdirSync(dir, (err, files) => {
@@ -319,7 +319,7 @@ console.log(chalk.bold.red(`Archivo ${file} no borrado` + err))
 }
 
 async function connectionUpdate(update) {
-  
+
 
   const {connection, lastDisconnect, isNewLogin} = update;
   stopped = connection;
@@ -377,9 +377,9 @@ let isInit = true;
 
 let handler = await import('./handler.js');
 global.reloadHandler = async function(restatConn) {
-  
+
   try {
-   
+
     const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error);
     if (Object.keys(Handler || {}).length) handler = Handler;
   } catch (e) {
