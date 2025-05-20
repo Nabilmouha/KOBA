@@ -1,3 +1,7 @@
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 import { ytdl } from 'savetubedl';
 
 const handler = async (m, { args, conn }) => {
@@ -6,26 +10,58 @@ const handler = async (m, { args, conn }) => {
 
   if (!url) return m.reply('يرجى إدخال رابط الفيديو');
 
+  // استخراج ID الفيديو
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/);
+  if (!match) return m.reply('الرابط غير صالح');
+  const id = match[1];
+  const thumbnail = `https://i.ytimg.com/vi/${id}/hq720.jpg`;
+
   try {
+    // إرسال الصورة المصغرة مع النص تحتها
+    await conn.sendMessage(m.chat, {
+      image: { url: thumbnail },
+      caption: '*_جاري التحميل●●●○○ 🖤 WAIT🩶_*'
+    }, { quoted: m });
+
+    // تحليل وتحميل الفيديو
     const result = await ytdl(url, quality);
     const data = result?.response;
-
     if (!data?.descarga) throw new Error('فشل الحصول على رابط التحميل');
 
-    // إرسال الصورة المصغرة مع وصف
+    const fileName = `${Date.now()}-${id}.mp4`;
+    const filePath = path.join('./tmp', fileName);
+    const fixedPath = filePath.replace('.mp4', '_fixed.mp4');
+
+    if (!fs.existsSync('./tmp')) fs.mkdirSync('./tmp');
+
+    const response = await axios({
+      method: 'GET',
+      url: data.descarga,
+      responseType: 'stream',
+    });
+
+    const writer = fs.createWriteStream(filePath);
+    response.data.pipe(writer);
+
+    await new Promise((resolve, reject) => {
+      writer.on('finish', resolve);
+      writer.on('error', reject);
+    });
+
+    execSync(`ffmpeg -i "${filePath}" -movflags +faststart -c copy "${fixedPath}"`);
+
     await conn.sendMessage(m.chat, {
-      image: { url: data.miniatura },
-      caption: `🎬 *${data.titulo}*\n📥 الجودة: ${data.calidad}p\n⌛ المدة: ${data.duracion}s\n\nسيتم إرسال الفيديو الآن...`,
+      video: { url: fixedPath },
+      mimetype: 'video/mp4',
+      caption: '📽️ تم التحميل بنجاح.'
     }, { quoted: m });
 
-    // إرسال الفيديو
-    await conn.sendMessage(m.chat, {
-      video: { url: data.descarga },
-      caption: `📽️ تم التحميل بنجاح.`,
-    }, { quoted: m });
+    fs.unlinkSync(filePath);
+    fs.unlinkSync(fixedPath);
 
   } catch (e) {
-    return m.reply(`حدث خطأ:\n${e.message}`);
+    console.error(e);
+    m.reply(`حدث خطأ:\n${e.message}`);
   }
 };
 
