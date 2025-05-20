@@ -10,20 +10,19 @@ const handler = async (m, { args, conn }) => {
 
   if (!url) return m.reply('يرجى إدخال رابط الفيديو');
 
-  // استخراج ID الفيديو
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/);
+  const cleanUrl = url.split('?')[0]; // حذف أي معلمات
+  const match = cleanUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/);
   if (!match) return m.reply('الرابط غير صالح');
+
   const id = match[1];
   const thumbnail = `https://i.ytimg.com/vi/${id}/hq720.jpg`;
 
   try {
-    // إرسال الصورة المصغرة مع النص تحتها
     await conn.sendMessage(m.chat, {
       image: { url: thumbnail },
       caption: '*_جاري التحميل●●●○○ 🖤 WAIT🩶_*'
     }, { quoted: m });
 
-    // تحليل وتحميل الفيديو
     const result = await ytdl(url, quality);
     const data = result?.response;
     if (!data?.descarga) throw new Error('فشل الحصول على رابط التحميل');
@@ -42,7 +41,6 @@ const handler = async (m, { args, conn }) => {
 
     const writer = fs.createWriteStream(filePath);
     response.data.pipe(writer);
-
     await new Promise((resolve, reject) => {
       writer.on('finish', resolve);
       writer.on('error', reject);
