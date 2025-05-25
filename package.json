@@ -67,6 +67,7 @@
     "google-it": "^1.6.3",
     "google-play-scraper": "^10.0.0",
     "hispamemes": "^1.0.7",
+"@cacheable/node-cache":"*",
     "human-readable": "^0.2.1",
     "imagemaker.js": "^2.0.4",
     "jsdom": "^19.0.0",
